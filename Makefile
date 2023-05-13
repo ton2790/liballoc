@@ -1,17 +1,31 @@
 CC = gcc
-CFLAGS = -O2 -g -Wall -Wextra
-LDFLAGS = -shared
-TARGET = liballoc.so
+CFLAGS = -O2 -g -Wall -Wextra -Iinc
+LIBRARY = liballoc.so
 
-SRCS = $(shell find ./src -name '*.c' -or -name '*.s')
-OBJS = $(SRCS:src/%.c=build/%.o)
+
+APP_DIR = ./app
+BIN_DIR = ./bin
+SRC_DIR = ./src
 
 .phony: all
+all: $(BIN_DIR)/$(LIBRARY)
 
-all: $(TARGET)
+.phony: check
+check: $(BIN_DIR)/main
+	$(BIN_DIR)/main
 
-$(TARGET): $(OBJS)
-	$(CC) $(LDFLAGS) -o $@ $^
+$(BIN_DIR)/lib_%.o: $(SRC_DIR)/%.c
+	$(CC) -fpic $(CFLAGS) -o $@ -c $<
 
-build/%.o: src/%.c
+$(BIN_DIR)/$(LIBRARY): $(BIN_DIR)/lib_*.o
+	$(CC) -shared -o $@ $^
+
+$(BIN_DIR)/app_%.o: $(APP_DIR)/%.c
 	$(CC) $(CFLAGS) -o $@ -c $<
+
+$(BIN_DIR)/%: $(BIN_DIR)/app_%.o $(BIN_DIR)/$(LIBRARY)
+	$(CC) -L$(BIN_DIR) -lalloc $(CFLAGS) -o $@ $<
+
+.phony: clean
+clean:
+	rm -f $(BIN_DIR)/*
