@@ -1,31 +1,28 @@
 CC = gcc
 CFLAGS = -O2 -g -Wall -Wextra -Iinc
-LIBRARY = liballoc.so
-
-
-APP_DIR = ./app
-BIN_DIR = ./bin
-SRC_DIR = ./src
 
 .phony: all
-all: $(BIN_DIR)/$(LIBRARY)
+all: ./bin/liballoc.so
 
 .phony: check
-check: $(BIN_DIR)/main
-	$(BIN_DIR)/main
+check: ./bin/main
+	./bin/main
 
-$(BIN_DIR)/lib_%.o: $(SRC_DIR)/%.c
+./bin/alloc.o: ./src/alloc.c
 	$(CC) -fpic $(CFLAGS) -o $@ -c $<
 
-$(BIN_DIR)/$(LIBRARY): $(BIN_DIR)/lib_*.o
-	$(CC) -shared -o $@ $^
-
-$(BIN_DIR)/app_%.o: $(APP_DIR)/%.c
+./bin/test.o: ./src/test.c
 	$(CC) $(CFLAGS) -o $@ -c $<
 
-$(BIN_DIR)/%: $(BIN_DIR)/app_%.o $(BIN_DIR)/$(LIBRARY)
-	$(CC) -L$(BIN_DIR) -lalloc $(CFLAGS) -o $@ $<
+./bin/liballoc.so: ./bin/alloc.o
+	$(CC) -shared -o $@ $^
+
+./bin/main.o: ./app/main.c
+	$(CC) $(CFLAGS) -o $@ -c $<
+
+./bin/main: ./bin/main.o ./bin/test.o ./bin/alloc.o
+	$(CC) $(CFLAGS) -o $@ $^
 
 .phony: clean
 clean:
-	rm -f $(BIN_DIR)/*
+	rm -f ./bin/*

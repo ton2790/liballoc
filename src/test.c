@@ -1,15 +1,17 @@
 #include <stdio.h>
 #include "test.h"
 
+static int tests = 0;
+static int passed = 0;
+
 void test(bool expr, char* name)
 {
   tests++;
-  if (!expr) {
+  if (expr) {
     passed++;
-    printf("Passed test %2d:\n", tests - 1);
     return;
   }
-  printf("Failed test %2d: %s\n", tests - 1, name);
+  printf("Failed test %2d: %s\n", tests, name);
 }
 
 void summary()
